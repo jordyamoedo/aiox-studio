@@ -44,6 +44,8 @@ export interface AIOXAgent {
   whenToUse: string
   commands: string[]
   filePath: string
+  namespace: string   // 'AIOX' | 'chiefs' | 'claude-code-mastery' | 'design-system' | 'cohort-squad'
+  activationCmd: string // e.g. '/AIOX:agents:dev' or '/chiefs:agents:copy-chief'
 }
 
 export interface AIOXFrameworkContext {

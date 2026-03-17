@@ -59,7 +59,21 @@ export function Sidebar() {
       <aside className="flex h-screen w-14 flex-col border-r border-border bg-card">
         {/* Logo */}
         <div className="flex h-12 items-center justify-center border-b border-border">
-          <span className="text-xs font-bold tracking-widest text-muted-foreground">AX</span>
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="AIOX">
+            {/* Outer ring */}
+            <circle cx="14" cy="14" r="12" stroke="hsl(var(--accent-primary))" strokeWidth="1.5" strokeOpacity="0.6" fill="none" />
+            {/* Inner hexagon */}
+            <path
+              d="M14 4 L21.5 8.5 L21.5 17.5 L14 22 L6.5 17.5 L6.5 8.5 Z"
+              stroke="hsl(var(--accent-primary))"
+              strokeWidth="1"
+              strokeOpacity="0.4"
+              fill="hsl(var(--accent-primary) / 0.05)"
+            />
+            {/* A */}
+            <path d="M10 19 L13 9 L16 9 L19 19" stroke="hsl(var(--accent-primary))" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+            <path d="M11.2 15.5 L16.8 15.5" stroke="hsl(var(--accent-primary))" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
         </div>
 
         {/* Navigation */}

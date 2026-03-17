@@ -7,9 +7,17 @@ import path from 'path'
 import type { AIOXAgent, AIOXFrameworkContext } from '@/types'
 
 const AIOX_PATH = process.env.AIOX_FRAMEWORK_PATH || path.join(process.cwd(), '..')
-const AGENTS_PATH = path.join(AIOX_PATH, '.claude/commands/AIOX/agents')
 const RULES_PATH = path.join(AIOX_PATH, '.claude/rules')
 const VERSION_PATH = path.join(AIOX_PATH, '.aiox-core/version.json')
+
+// Todos os namespaces de agentes
+const AGENT_NAMESPACES = [
+  { namespace: 'AIOX', dir: '.claude/commands/AIOX/agents' },
+  { namespace: 'chiefs', dir: '.claude/commands/chiefs/agents' },
+  { namespace: 'claude-code-mastery', dir: '.claude/commands/claude-code-mastery/agents' },
+  { namespace: 'design-system', dir: '.claude/commands/design-system/agents' },
+  { namespace: 'cohort-squad', dir: '.claude/commands/cohort-squad/agents' },
+]
 
 function isLocalEnvironment(): boolean {
   return process.env.NODE_ENV === 'development'
@@ -18,20 +26,23 @@ function isLocalEnvironment(): boolean {
 export async function readAgents(): Promise<AIOXAgent[]> {
   if (!isLocalEnvironment()) return []
 
-  try {
-    const files = fs.readdirSync(AGENTS_PATH).filter(f => f.endsWith('.md'))
-    const agents: AIOXAgent[] = []
+  const agents: AIOXAgent[] = []
 
-    for (const file of files) {
-      const content = fs.readFileSync(path.join(AGENTS_PATH, file), 'utf-8')
-      const agent = parseAgentFile(content, file)
-      if (agent) agents.push(agent)
-    }
-
-    return agents
-  } catch {
-    return []
+  for (const { namespace, dir } of AGENT_NAMESPACES) {
+    const agentsPath = path.join(AIOX_PATH, dir)
+    try {
+      const files = fs.readdirSync(agentsPath).filter(f => f.endsWith('.md'))
+      for (const file of files) {
+        try {
+          const content = fs.readFileSync(path.join(agentsPath, file), 'utf-8')
+          const agent = parseAgentFile(content, file, agentsPath, namespace)
+          if (agent) agents.push(agent)
+        } catch {}
+      }
+    } catch {}
   }
+
+  return agents
 }
 
 export async function readRules(): Promise<string[]> {
@@ -81,21 +92,27 @@ export async function getFrameworkContext(): Promise<AIOXFrameworkContext> {
   }
 }
 
-function parseAgentFile(content: string, filename: string): AIOXAgent | null {
+function parseAgentFile(
+  content: string,
+  filename: string,
+  agentsPath: string,
+  namespace: string
+): AIOXAgent | null {
   try {
-    // Extrai campos do YAML block dentro do arquivo .md
-    const nameMatch = content.match(/name:\s*([^\n]+)/)
-    const idMatch = content.match(/id:\s*([^\n]+)/)
-    const titleMatch = content.match(/title:\s*([^\n]+)/)
-    const roleMatch = content.match(/role:\s*([^\n]+)/)
+    const nameMatch = content.match(/^\s*name:\s*([^\n]+)/m)
+    const idMatch = content.match(/^\s*id:\s*([^\n]+)/m)
+    const titleMatch = content.match(/^\s*title:\s*([^\n]+)/m)
+    const roleMatch = content.match(/^\s*role:\s*([^\n]+)/m)
     const whenToUseMatch = content.match(/whenToUse:\s*\|?\s*\n?([\s\S]*?)(?=\n\S|\ncommands:|$)/)
 
     const name = nameMatch?.[1]?.trim() || filename.replace('.md', '')
     const id = idMatch?.[1]?.trim() || filename.replace('.md', '')
 
-    // Extrai comandos
     const commandMatches = [...content.matchAll(/- name:\s*([^\n]+)/g)]
     const commands = commandMatches.map(m => m[1].trim()).slice(0, 10)
+
+    // Activation command: /{namespace}:agents:{id}
+    const activationCmd = `/${namespace}:agents:${id}`
 
     return {
       id,
@@ -105,7 +122,9 @@ function parseAgentFile(content: string, filename: string): AIOXAgent | null {
       scope: '',
       whenToUse: whenToUseMatch?.[1]?.trim().slice(0, 200) || '',
       commands,
-      filePath: path.join(AGENTS_PATH, filename),
+      filePath: path.join(agentsPath, filename),
+      namespace,
+      activationCmd,
     }
   } catch {
     return null
@@ -131,27 +150,30 @@ export async function searchFramework(query: string): Promise<SearchResult[]> {
 
   const TASKS_PATH = path.join(AIOX_PATH, '.aiox-core/development/tasks')
 
-  // Search agents
-  try {
-    const files = fs.readdirSync(AGENTS_PATH).filter(f => f.endsWith('.md'))
-    for (const file of files) {
-      const content = fs.readFileSync(path.join(AGENTS_PATH, file), 'utf-8')
-      if (content.toLowerCase().includes(q)) {
-        const lines = content.split('\n').filter(Boolean)
-        const matchLine = lines.find(l => l.toLowerCase().includes(q)) || ''
-        const nameMatch = content.match(/name:\s*([^\n]+)/)
-        results.push({
-          id: `agent-${file}`,
-          file: file.replace('.md', ''),
-          filePath: `agents/${file}`,
-          type: 'agent',
-          label: nameMatch?.[1]?.trim() || file.replace('.md', ''),
-          excerpt: lines.slice(0, 3).join(' ').slice(0, 150),
-          matchedLine: matchLine.trim().slice(0, 120),
-        })
+  // Search agents across all namespaces
+  for (const { namespace, dir } of AGENT_NAMESPACES) {
+    try {
+      const agentsPath = path.join(AIOX_PATH, dir)
+      const files = fs.readdirSync(agentsPath).filter(f => f.endsWith('.md'))
+      for (const file of files) {
+        const content = fs.readFileSync(path.join(agentsPath, file), 'utf-8')
+        if (content.toLowerCase().includes(q)) {
+          const lines = content.split('\n').filter(Boolean)
+          const matchLine = lines.find(l => l.toLowerCase().includes(q)) || ''
+          const nameMatch = content.match(/name:\s*([^\n]+)/)
+          results.push({
+            id: `agent-${namespace}-${file}`,
+            file: file.replace('.md', ''),
+            filePath: `${dir}/${file}`,
+            type: 'agent',
+            label: nameMatch?.[1]?.trim() || file.replace('.md', ''),
+            excerpt: lines.slice(0, 3).join(' ').slice(0, 150),
+            matchedLine: matchLine.trim().slice(0, 120),
+          })
+        }
       }
-    }
-  } catch {}
+    } catch {}
+  }
 
   // Search rules
   try {
