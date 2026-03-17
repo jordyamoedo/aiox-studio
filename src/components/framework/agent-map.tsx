@@ -25,7 +25,7 @@ const NAMESPACE_META: Record<string, {
   chiefs: {
     label: 'Chiefs',
     description: 'Orquestradores de domínio — marketing, design, dados, tráfego',
-    color: 'border-[hsl(var(--accent-direcionador)/0.4)] bg-[hsl(var(--accent-direcionador)/0.04)]',
+    color: 'border-amber-500/40 bg-amber-500/[0.03]',
     defaultOpen: true,
   },
   'claude-code-mastery': {
@@ -43,7 +43,7 @@ const NAMESPACE_META: Record<string, {
   'cohort-squad': {
     label: 'Squads',
     description: 'Squads especializados para domínios específicos',
-    color: 'border-[hsl(var(--muted-foreground)/0.3)] bg-transparent',
+    color: 'border-teal-500/40 bg-teal-500/[0.03]',
     defaultOpen: false,
   },
 }
@@ -197,11 +197,13 @@ function NamespaceSection({
   if (agents.length === 0) return null
 
   const defaultChipColor = namespace === 'chiefs'
-    ? 'bg-[hsl(var(--accent-direcionador)/0.12)] border-[hsl(var(--accent-direcionador)/0.3)] text-[hsl(var(--accent-direcionador))]'
+    ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
     : namespace === 'claude-code-mastery'
     ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400'
     : namespace === 'design-system'
     ? 'bg-pink-500/10 border-pink-500/30 text-pink-400'
+    : namespace === 'cohort-squad'
+    ? 'bg-teal-500/10 border-teal-500/30 text-teal-400'
     : 'bg-secondary border-border text-foreground'
 
   return (
