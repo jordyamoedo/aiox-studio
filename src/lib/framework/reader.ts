@@ -112,6 +112,108 @@ function parseAgentFile(content: string, filename: string): AIOXAgent | null {
   }
 }
 
+export interface SearchResult {
+  id: string
+  file: string
+  filePath: string
+  type: 'agent' | 'rule' | 'task'
+  label: string
+  excerpt: string
+  matchedLine: string
+}
+
+export async function searchFramework(query: string): Promise<SearchResult[]> {
+  if (!isLocalEnvironment()) return []
+  if (!query.trim() || query.length < 2) return []
+
+  const results: SearchResult[] = []
+  const q = query.toLowerCase()
+
+  const TASKS_PATH = path.join(AIOX_PATH, '.aiox-core/development/tasks')
+
+  // Search agents
+  try {
+    const files = fs.readdirSync(AGENTS_PATH).filter(f => f.endsWith('.md'))
+    for (const file of files) {
+      const content = fs.readFileSync(path.join(AGENTS_PATH, file), 'utf-8')
+      if (content.toLowerCase().includes(q)) {
+        const lines = content.split('\n').filter(Boolean)
+        const matchLine = lines.find(l => l.toLowerCase().includes(q)) || ''
+        const nameMatch = content.match(/name:\s*([^\n]+)/)
+        results.push({
+          id: `agent-${file}`,
+          file: file.replace('.md', ''),
+          filePath: `agents/${file}`,
+          type: 'agent',
+          label: nameMatch?.[1]?.trim() || file.replace('.md', ''),
+          excerpt: lines.slice(0, 3).join(' ').slice(0, 150),
+          matchedLine: matchLine.trim().slice(0, 120),
+        })
+      }
+    }
+  } catch {}
+
+  // Search rules
+  try {
+    const files = fs.readdirSync(RULES_PATH).filter(f => f.endsWith('.md'))
+    for (const file of files) {
+      const content = fs.readFileSync(path.join(RULES_PATH, file), 'utf-8')
+      if (content.toLowerCase().includes(q)) {
+        const lines = content.split('\n').filter(Boolean)
+        const matchLine = lines.find(l => l.toLowerCase().includes(q)) || ''
+        const titleMatch = content.match(/^#\s+(.+)/)
+        results.push({
+          id: `rule-${file}`,
+          file: file.replace('.md', ''),
+          filePath: `rules/${file}`,
+          type: 'rule',
+          label: titleMatch?.[1]?.trim() || file.replace('.md', '').replace(/-/g, ' '),
+          excerpt: lines.slice(0, 3).join(' ').slice(0, 150),
+          matchedLine: matchLine.trim().slice(0, 120),
+        })
+      }
+    }
+  } catch {}
+
+  // Search tasks
+  try {
+    const files = fs.readdirSync(TASKS_PATH).filter(f => f.endsWith('.md'))
+    for (const file of files) {
+      const content = fs.readFileSync(path.join(TASKS_PATH, file), 'utf-8')
+      if (content.toLowerCase().includes(q)) {
+        const lines = content.split('\n').filter(Boolean)
+        const matchLine = lines.find(l => l.toLowerCase().includes(q)) || ''
+        const titleMatch = content.match(/^#\s+(.+)/)
+        results.push({
+          id: `task-${file}`,
+          file: file.replace('.md', ''),
+          filePath: `tasks/${file}`,
+          type: 'task',
+          label: titleMatch?.[1]?.trim() || file.replace('.md', '').replace(/-/g, ' '),
+          excerpt: lines.slice(0, 3).join(' ').slice(0, 150),
+          matchedLine: matchLine.trim().slice(0, 120),
+        })
+      }
+    }
+  } catch {}
+
+  return results.slice(0, 25)
+}
+
+export async function readFileContent(filePath: string): Promise<string | null> {
+  if (!isLocalEnvironment()) return null
+  try {
+    const fullPath = path.join(AIOX_PATH, filePath.replace(/^(agents|rules|tasks)\//, (match, type) => {
+      if (type === 'agents') return '.claude/commands/AIOX/agents/'
+      if (type === 'rules') return '.claude/rules/'
+      return '.aiox-core/development/tasks/'
+    }))
+    return fs.readFileSync(fullPath, 'utf-8')
+  } catch {
+    return null
+  }
+}
+
 // Contexto compacto para system prompt da IA (respeita rate limit Groq)
 export async function getCompactContextForAI(): Promise<string> {
   const agents = await readAgents()
