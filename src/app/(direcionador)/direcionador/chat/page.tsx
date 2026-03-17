@@ -1,26 +1,15 @@
-import { Sidebar } from '@/components/shared/sidebar'
+import { PageLayout } from '@/components/shared/page-layout'
 import { Chat } from '@/components/shared/chat'
 
 export default function DireciondorChatPage() {
   return (
-    <div className="flex h-screen">
-      <Sidebar />
-      <div className="flex flex-1 flex-col">
-        <header className="flex h-12 items-center border-b border-border px-4 border-l-2 border-l-[hsl(var(--accent-direcionador))]">
-          <div>
-            <span className="text-sm font-medium">O Direcionador</span>
-            <span className="ml-2 text-xs text-muted-foreground">Transforme capacidade em resultado</span>
-          </div>
-        </header>
-        <div className="flex-1 overflow-hidden">
-          <Chat
-            space="direcionador"
-            placeholder="Qual problema você quer resolver?"
-            emptyStateTitle="Qual é o norte hoje?"
-            emptyStateHint="Descreva um problema, oportunidade ou decisão. Quanto mais contexto você der, mais específica e útil será a direção."
-          />
-        </div>
-      </div>
-    </div>
+    <PageLayout title="O Direcionador" subtitle="Transforme capacidade em resultado" space="direcionador">
+      <Chat
+        space="direcionador"
+        placeholder="Qual problema você quer resolver?"
+        emptyStateTitle="Qual é o norte hoje?"
+        emptyStateHint="Descreva um problema, oportunidade ou decisão. Quanto mais contexto você der, mais específica e útil será a direção."
+      />
+    </PageLayout>
   )
 }

@@ -1,13 +1,10 @@
-import { Sidebar } from '@/components/shared/sidebar'
+import { PageLayout } from '@/components/shared/page-layout'
 import { AgentMap } from '@/components/framework/agent-map'
 
 export default function MapaPage() {
   return (
-    <div className="flex h-screen">
-      <Sidebar />
-      <main className="flex-1 overflow-hidden">
-        <AgentMap />
-      </main>
-    </div>
+    <PageLayout title="Mapa" subtitle="Agentes, conexões e fluxos do AIOX" space="framework">
+      <AgentMap />
+    </PageLayout>
   )
 }
