@@ -7,7 +7,7 @@ export default function DecisoesPage() {
     <div className="flex h-screen">
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
-        <header className="flex h-12 items-center border-b border-border px-4 shrink-0">
+        <header className="flex h-12 items-center border-b border-border px-4 shrink-0 border-l-2 border-l-[hsl(var(--accent-direcionador))]">
           <div>
             <span className="text-sm font-medium">Decisões</span>
             <span className="ml-2 text-xs text-muted-foreground">Histórico e padrões do Direcionador</span>

@@ -25,6 +25,7 @@
     --status-warning: 38 92% 50%;
     --status-error: 0 72% 51%;
     --accent-primary: 234 89% 64%;
+    --accent-direcionador: 38 92% 50%;
   }
 
   .dark {
@@ -50,6 +51,7 @@
     --status-warning: 38 92% 47%;
     --status-error: 0 72% 48%;
     --accent-primary: 234 89% 67%;
+    --accent-direcionador: 38 92% 47%;
   }
 }
 

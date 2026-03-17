@@ -6,7 +6,7 @@ export default function DireciondorChatPage() {
     <div className="flex h-screen">
       <Sidebar />
       <div className="flex flex-1 flex-col">
-        <header className="flex h-12 items-center border-b border-border px-4">
+        <header className="flex h-12 items-center border-b border-border px-4 border-l-2 border-l-[hsl(var(--accent-direcionador))]">
           <div>
             <span className="text-sm font-medium">O Direcionador</span>
             <span className="ml-2 text-xs text-muted-foreground">Transforme capacidade em resultado</span>

@@ -19,6 +19,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 const nav = [
   {
     section: 'O Framework',
+    accent: 'framework' as const,
     items: [
       { href: '/framework/mapa', icon: Map, label: 'Mapa', tooltip: 'Mapa visual de todos os agentes e conexões' },
       { href: '/framework/wiki', icon: BookOpen, label: 'Wiki', tooltip: 'Referência navegável do framework' },
@@ -28,6 +29,7 @@ const nav = [
   },
   {
     section: 'O Direcionador',
+    accent: 'direcionador' as const,
     items: [
       { href: '/direcionador/chat', icon: Compass, label: 'Direção', tooltip: 'Qual caminho seguir agora?' },
       { href: '/direcionador/decisoes', icon: GitBranch, label: 'Decisões', tooltip: 'Histórico de decisões e padrões' },
@@ -35,12 +37,19 @@ const nav = [
   },
   {
     section: 'Sistema',
+    accent: 'sistema' as const,
     items: [
       { href: '/sentinela', icon: Radio, label: 'Sentinela', tooltip: 'Atualizações do framework upstream' },
       { href: '/configuracoes', icon: Settings, label: 'Config', tooltip: 'Preferências e conexões' },
     ],
   },
 ]
+
+const ACCENT_ACTIVE: Record<string, string> = {
+  framework: 'bg-[hsl(var(--accent-primary)/0.15)] text-[hsl(var(--accent-primary))]',
+  direcionador: 'bg-[hsl(var(--accent-direcionador)/0.15)] text-[hsl(var(--accent-direcionador))]',
+  sistema: 'bg-secondary text-foreground',
+}
 
 export function Sidebar() {
   const pathname = usePathname()
@@ -68,7 +77,7 @@ export function Sidebar() {
                         className={cn(
                           'flex h-9 w-9 items-center justify-center rounded-md transition-colors',
                           isActive
-                            ? 'bg-secondary text-foreground'
+                            ? ACCENT_ACTIVE[section.accent]
                             : 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
                         )}
                       >
