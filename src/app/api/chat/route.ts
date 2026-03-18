@@ -6,7 +6,11 @@ import type { Space, ChatMessage } from '@/types'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { messages, space }: { messages: ChatMessage[]; space: Space } = body
+    const { messages, space, energyContext }: {
+      messages: ChatMessage[]
+      space: Space
+      energyContext?: string
+    } = body
 
     if (!messages?.length || !space) {
       return NextResponse.json({ error: 'messages e space são obrigatórios' }, { status: 400 })
@@ -17,7 +21,7 @@ export async function POST(request: NextRequest) {
       ? await getCompactContextForAI()
       : undefined
 
-    const stream = await streamChat(messages, space, frameworkContext)
+    const stream = await streamChat(messages, space, frameworkContext, energyContext)
 
     // Retorna como stream SSE
     const encoder = new TextEncoder()

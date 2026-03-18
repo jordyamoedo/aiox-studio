@@ -8,114 +8,206 @@ import { cn } from '@/lib/utils'
 import type { AIOXAgent } from '@/types'
 import { AgentModal } from './agent-modal'
 
-// ── Cores e metadados por namespace ──────────────────────────────────────────
+// ── Estilos por namespace ─────────────────────────────────────────────────────
 
-const NS_STYLE: Record<string, { label: string; chip: string; zone: string }> = {
-  AIOX:                { label: 'Core AIOX',      chip: 'bg-[hsl(var(--accent-primary)/0.12)] border-[hsl(var(--accent-primary)/0.35)] text-[hsl(var(--accent-primary))]',   zone: 'border-[hsl(var(--accent-primary)/0.3)] bg-[hsl(var(--accent-primary)/0.03)]' },
-  chiefs:              { label: 'Chiefs',          chip: 'bg-amber-500/10 border-amber-500/30 text-amber-400',     zone: 'border-amber-500/30 bg-amber-500/[0.02]' },
-  'claude-code-mastery':{ label: 'Claude Mastery', chip: 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400',  zone: 'border-indigo-500/30 bg-indigo-500/[0.02]' },
-  'design-system':     { label: 'Design System',  chip: 'bg-pink-500/10 border-pink-500/30 text-pink-400',        zone: 'border-pink-500/30 bg-pink-500/[0.02]' },
-  'cohort-squad':      { label: 'Squads',          chip: 'bg-teal-500/10 border-teal-500/30 text-teal-400',        zone: 'border-teal-500/30 bg-teal-500/[0.02]' },
-  synapse:             { label: 'Synapse',         chip: 'bg-violet-500/10 border-violet-500/30 text-violet-400',  zone: 'border-violet-500/30 bg-violet-500/[0.02]' },
+const NS_STYLE: Record<string, {
+  label: string
+  node: string        // estilo do nó
+  nodeSel: string     // nó selecionado
+  zone: string        // borda da zona
+  tag: string         // badge/tag
+}> = {
+  AIOX: {
+    label: 'Core AIOX',
+    node:    'border-[hsl(var(--accent-primary)/0.3)] bg-card hover:border-[hsl(var(--accent-primary)/0.6)] hover:bg-[hsl(var(--accent-primary)/0.05)]',
+    nodeSel: 'border-[hsl(var(--accent-primary)/0.8)] bg-[hsl(var(--accent-primary)/0.1)] shadow-sm ring-1 ring-[hsl(var(--accent-primary)/0.3)]',
+    zone:    'border-[hsl(var(--accent-primary)/0.25)] bg-[hsl(var(--accent-primary)/0.02)]',
+    tag:     'text-[hsl(var(--accent-primary))]',
+  },
+  chiefs: {
+    label: 'Chiefs',
+    node:    'border-amber-500/30 bg-card hover:border-amber-500/60 hover:bg-amber-500/5',
+    nodeSel: 'border-amber-500/80 bg-amber-500/10 shadow-sm ring-1 ring-amber-500/30',
+    zone:    'border-amber-500/25 bg-amber-500/[0.015]',
+    tag:     'text-amber-400',
+  },
+  'claude-code-mastery': {
+    label: 'Claude Mastery',
+    node:    'border-indigo-500/30 bg-card hover:border-indigo-500/60 hover:bg-indigo-500/5',
+    nodeSel: 'border-indigo-500/80 bg-indigo-500/10 shadow-sm ring-1 ring-indigo-500/30',
+    zone:    'border-indigo-500/25 bg-indigo-500/[0.015]',
+    tag:     'text-indigo-400',
+  },
+  'design-system': {
+    label: 'Design System',
+    node:    'border-pink-500/30 bg-card hover:border-pink-500/60 hover:bg-pink-500/5',
+    nodeSel: 'border-pink-500/80 bg-pink-500/10 shadow-sm ring-1 ring-pink-500/30',
+    zone:    'border-pink-500/25 bg-pink-500/[0.015]',
+    tag:     'text-pink-400',
+  },
+  'cohort-squad': {
+    label: 'Squads',
+    node:    'border-teal-500/30 bg-card hover:border-teal-500/60 hover:bg-teal-500/5',
+    nodeSel: 'border-teal-500/80 bg-teal-500/10 shadow-sm ring-1 ring-teal-500/30',
+    zone:    'border-teal-500/25 bg-teal-500/[0.015]',
+    tag:     'text-teal-400',
+  },
+  synapse: {
+    label: 'Synapse',
+    node:    'border-violet-500/30 bg-card hover:border-violet-500/60 hover:bg-violet-500/5',
+    nodeSel: 'border-violet-500/80 bg-violet-500/10 shadow-sm ring-1 ring-violet-500/30',
+    zone:    'border-violet-500/25 bg-violet-500/[0.015]',
+    tag:     'text-violet-400',
+  },
+}
+
+// ── AgentNode — nó visível no mapa ────────────────────────────────────────────
+
+function AgentNode({
+  agent, selected, onClick, size = 'md',
+}: {
+  agent: AIOXAgent
+  selected: boolean
+  onClick: () => void
+  size?: 'sm' | 'md' | 'lg'
+}) {
+  const style = NS_STYLE[agent.namespace] || NS_STYLE['cohort-squad']
+
+  // Role truncado para caber no nó
+  const roleShort = agent.role
+    ? agent.role.replace(/Specialist|Engineer|Architect|Expert|Manager|Master|Senior/g, '').trim().slice(0, 36)
+    : ''
+
+  if (size === 'sm') {
+    return (
+      <button
+        onClick={onClick}
+        className={cn(
+          'flex flex-col items-start gap-0.5 px-3 py-2 rounded-xl border transition-all cursor-pointer text-left',
+          selected ? style.nodeSel : style.node
+        )}
+      >
+        <div className="flex items-center gap-1.5">
+          {agent.icon && <span className="text-sm leading-none">{agent.icon}</span>}
+          <span className={cn('text-xs font-mono font-semibold', selected ? style.tag : 'text-foreground')}>
+            @{agent.id}
+          </span>
+        </div>
+        <span className="text-[10px] text-muted-foreground leading-tight">{agent.name}</span>
+      </button>
+    )
+  }
+
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        'flex flex-col items-start gap-1 px-4 py-3 rounded-xl border transition-all cursor-pointer text-left min-w-[130px]',
+        selected ? style.nodeSel : style.node
+      )}
+    >
+      <div className="flex items-center gap-2">
+        {agent.icon && <span className="text-base leading-none">{agent.icon}</span>}
+        <span className={cn('text-sm font-mono font-semibold', selected ? style.tag : 'text-foreground')}>
+          @{agent.id}
+        </span>
+      </div>
+      <span className="text-xs text-foreground/80 font-medium">{agent.name}</span>
+      {roleShort && (
+        <span className="text-[10px] text-muted-foreground leading-tight">{roleShort}</span>
+      )}
+    </button>
+  )
 }
 
 // ── Pipeline SDC ──────────────────────────────────────────────────────────────
 
 const SDC_STEPS = [
-  { id: 'sm',     label: 'Criar',       desc: 'Escreve a story a partir do épico' },
-  { id: 'po',     label: 'Validar',     desc: 'Checklist de 10 pontos — GO/NO-GO' },
-  { id: 'dev',    label: 'Implementar', desc: 'Código, commits locais, debugging' },
-  { id: 'qa',     label: 'Revisar',     desc: '7 critérios — PASS/CONCERNS/FAIL' },
-  { id: 'devops', label: 'Publicar',    desc: 'git push, PR, CI/CD — exclusivo' },
+  { id: 'sm',     phase: '1',  label: 'Criar',       desc: 'Story a partir do épico' },
+  { id: 'po',     phase: '2',  label: 'Validar',     desc: 'GO/NO-GO — 10 critérios' },
+  { id: 'dev',    phase: '3',  label: 'Implementar', desc: 'Código + commits locais' },
+  { id: 'qa',     phase: '4',  label: 'Revisar',     desc: 'PASS/FAIL — 7 critérios' },
+  { id: 'devops', phase: '5',  label: 'Publicar',    desc: 'git push, PR — exclusivo' },
 ]
 
-// Agentes que orbitam o SDC mas não são do pipeline
-const SDC_SUPPORT: Record<string, { connectsTo: string; label: string }> = {
-  'aiox-master':    { connectsTo: 'all',    label: 'Orquestra tudo' },
-  'pm':             { connectsTo: 'sm',     label: 'Cria épicos → feeds @sm' },
-  'analyst':        { connectsTo: 'pm',     label: 'Pesquisa → feeds @pm' },
-  'architect':      { connectsTo: 'dev',    label: 'Arquitetura → feeds @dev' },
-  'data-engineer':  { connectsTo: 'dev',    label: 'Schema/DB → feeds @dev' },
-  'ux-design-expert':{ connectsTo: 'dev',   label: 'UX/UI → feeds @dev' },
-  'doc-guardian':   { connectsTo: 'devops', label: 'Docs → valida após @devops' },
+const SDC_SUPPORT: Record<string, string> = {
+  'aiox-master':     'Orquestra tudo',
+  'pm':              '→ alimenta @sm',
+  'analyst':         '→ alimenta @pm',
+  'architect':       '→ alimenta @dev',
+  'data-engineer':   '→ alimenta @dev',
+  'ux-design-expert':'→ alimenta @dev',
+  'doc-guardian':    '→ audita docs',
 }
-
-// ── AgentChip ─────────────────────────────────────────────────────────────────
-
-function AgentChip({
-  agent, selected, onClick,
-}: { agent: AIOXAgent; selected: boolean; onClick: () => void }) {
-  const style = NS_STYLE[agent.namespace] || NS_STYLE['cohort-squad']
-  return (
-    <button
-      onClick={onClick}
-      className={cn(
-        'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs transition-all cursor-pointer shrink-0',
-        style.chip,
-        selected ? 'ring-1 ring-current scale-[1.03] shadow-sm' : 'hover:opacity-80'
-      )}
-    >
-      <span className="font-mono font-medium">@{agent.id}</span>
-    </button>
-  )
-}
-
-
-// ── SDC Pipeline visual ───────────────────────────────────────────────────────
 
 function SdcPipeline({
   agents, selected, onSelect,
 }: { agents: AIOXAgent[]; selected: AIOXAgent | null; onSelect: (a: AIOXAgent) => void }) {
-  const getAgent = (id: string) => agents.find(a => a.id === id)
+  const get = (id: string) => agents.find(a => a.id === id)
+  const style = NS_STYLE.AIOX
 
   return (
-    <div className="rounded-xl border-2 border-[hsl(var(--accent-primary)/0.3)] bg-[hsl(var(--accent-primary)/0.03)] p-5">
-      <div className="flex items-center gap-2 mb-4">
-        <span className="text-xs font-semibold uppercase tracking-wider text-[hsl(var(--accent-primary))]">Pipeline SDC</span>
-        <span className="text-xs text-muted-foreground">— ciclo completo de desenvolvimento</span>
+    <div className={cn('rounded-2xl border-2 p-5', style.zone)}>
+      <div className="flex items-center gap-2 mb-5">
+        <span className={cn('text-xs font-bold uppercase tracking-widest', style.tag)}>Pipeline SDC</span>
+        <span className="text-xs text-muted-foreground">ciclo completo de desenvolvimento</span>
       </div>
 
-      {/* Pipeline steps */}
-      <div className="flex items-stretch gap-1 overflow-x-auto pb-1">
+      {/* Fases do pipeline */}
+      <div className="flex items-start gap-2 overflow-x-auto pb-2">
         {SDC_STEPS.map((step, i) => {
-          const agent = getAgent(step.id)
-          const isSelected = selected?.id === step.id
+          const agent = get(step.id)
+          const isSel = selected?.id === step.id
           return (
-            <div key={step.id} className="flex items-center gap-1 shrink-0">
-              <button
-                onClick={() => agent && onSelect(agent)}
-                disabled={!agent}
-                className={cn(
-                  'flex flex-col items-center text-center px-4 py-3 rounded-xl border transition-all min-w-[100px]',
-                  isSelected
-                    ? 'border-[hsl(var(--accent-primary)/0.6)] bg-[hsl(var(--accent-primary)/0.12)] shadow-sm'
-                    : 'border-[hsl(var(--accent-primary)/0.2)] bg-card hover:border-[hsl(var(--accent-primary)/0.4)] hover:bg-[hsl(var(--accent-primary)/0.06)]',
-                  !agent && 'opacity-40 cursor-default'
+            <div key={step.id} className="flex items-center gap-2 shrink-0">
+              <div className="flex flex-col gap-1">
+                {/* Indicador de fase */}
+                <div className="flex items-center gap-1.5 mb-1">
+                  <span className={cn(
+                    'text-[9px] font-bold px-1.5 py-0.5 rounded-full',
+                    isSel
+                      ? 'bg-[hsl(var(--accent-primary))] text-white'
+                      : 'bg-[hsl(var(--accent-primary)/0.15)] text-[hsl(var(--accent-primary))]'
+                  )}>
+                    {step.phase}
+                  </span>
+                  <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">{step.label}</span>
+                </div>
+
+                {/* Nó do agente */}
+                {agent ? (
+                  <AgentNode agent={agent} selected={isSel} onClick={() => onSelect(agent)} size="md" />
+                ) : (
+                  <div className="min-w-[130px] px-4 py-3 rounded-xl border border-dashed border-border opacity-40">
+                    <span className="text-xs text-muted-foreground font-mono">@{step.id}</span>
+                  </div>
                 )}
-              >
-                <span className={cn('text-xs font-semibold mb-0.5', isSelected ? 'text-[hsl(var(--accent-primary))]' : 'text-foreground')}>
-                  {step.label}
-                </span>
-                <span className="text-[10px] text-muted-foreground font-mono">@{step.id}</span>
-                <span className="text-[10px] text-muted-foreground mt-1 leading-tight max-w-[90px] hidden sm:block">{step.desc}</span>
-              </button>
+                {/* Descrição da fase */}
+                <span className="text-[10px] text-muted-foreground px-1 leading-tight max-w-[130px]">{step.desc}</span>
+              </div>
+
               {i < SDC_STEPS.length - 1 && (
-                <ArrowRight className="h-3.5 w-3.5 text-[hsl(var(--accent-primary)/0.5)] shrink-0" />
+                <ArrowRight className={cn('h-4 w-4 shrink-0 mt-6', style.tag, 'opacity-50')} />
               )}
             </div>
           )
         })}
       </div>
 
-      {/* Support agents */}
-      <div className="mt-4 pt-3 border-t border-[hsl(var(--accent-primary)/0.15)]">
-        <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2 font-semibold">Suporte ao pipeline</p>
+      {/* Suporte ao pipeline */}
+      <div className="mt-5 pt-4 border-t border-[hsl(var(--accent-primary)/0.15)]">
+        <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold mb-3">
+          Suporte ao pipeline
+        </p>
         <div className="flex flex-wrap gap-2">
           {Object.keys(SDC_SUPPORT).map(id => {
-            const agent = getAgent(id)
+            const agent = get(id)
             if (!agent) return null
             return (
-              <AgentChip key={id} agent={agent} selected={selected?.id === id} onClick={() => onSelect(agent)} />
+              <div key={id} className="flex flex-col gap-0.5">
+                <AgentNode agent={agent} selected={selected?.id === id} onClick={() => onSelect(agent)} size="sm" />
+                <span className="text-[9px] text-muted-foreground px-0.5">{SDC_SUPPORT[id]}</span>
+              </div>
             )
           })}
         </div>
@@ -142,12 +234,12 @@ function DomainZone({
   if (agents.length === 0) return null
 
   return (
-    <div className={cn('rounded-xl border-2 transition-all', style.zone)}>
+    <div className={cn('rounded-2xl border-2 transition-all', style.zone)}>
       <button
         onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center justify-between px-4 py-3 text-left"
+        className="w-full flex items-center justify-between px-5 py-3.5 text-left"
       >
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           <span className="text-sm font-semibold">{label}</span>
           <Badge variant="secondary" className="text-xs">{agents.length}</Badge>
           <span className="text-xs text-muted-foreground hidden sm:block">{description}</span>
@@ -159,49 +251,32 @@ function DomainZone({
       </button>
 
       {open && (
-        <div className="px-4 pb-4 border-t border-border/40 pt-3 flex flex-wrap gap-2">
-          {agents.map(agent => (
-            <AgentChip
-              key={agent.id}
-              agent={agent}
-              selected={selected?.id === agent.id}
-              onClick={() => onSelect(agent)}
-            />
-          ))}
+        <div className="px-5 pb-5 border-t border-border/40 pt-4">
+          <div className="flex flex-wrap gap-3">
+            {agents.map(agent => (
+              <AgentNode
+                key={agent.id}
+                agent={agent}
+                selected={selected?.id === agent.id}
+                onClick={() => onSelect(agent)}
+                size="md"
+              />
+            ))}
+          </div>
         </div>
       )}
     </div>
   )
 }
 
-// ── Domínios externos (não-SDC) ───────────────────────────────────────────────
+// ── Configuração das zonas de domínio ─────────────────────────────────────────
 
 const DOMAIN_ZONES = [
-  {
-    namespace: 'chiefs',
-    label: 'Chiefs',
-    description: 'Orquestradores de domínio — cada um comanda um time de especialistas',
-  },
-  {
-    namespace: 'claude-code-mastery',
-    label: 'Claude Mastery',
-    description: 'Especialistas em otimizar e expandir o ambiente Claude Code',
-  },
-  {
-    namespace: 'design-system',
-    label: 'Design System',
-    description: 'Atomic design, tokens, componentes, DesignOps e geração de imagens',
-  },
-  {
-    namespace: 'cohort-squad',
-    label: 'Cohort Squad',
-    description: 'Gestão de cohorts de compradores',
-  },
-  {
-    namespace: 'synapse',
-    label: 'Synapse',
-    description: 'Motor de contexto — domains, rules e star-commands',
-  },
+  { namespace: 'chiefs',              label: 'Chiefs',         description: 'Orquestradores de domínio — cada um comanda um time de especialistas' },
+  { namespace: 'claude-code-mastery', label: 'Claude Mastery', description: 'Especialistas em otimizar e expandir o ambiente Claude Code' },
+  { namespace: 'design-system',       label: 'Design System',  description: 'Atomic design, tokens, componentes e geração de imagens' },
+  { namespace: 'cohort-squad',        label: 'Cohort Squad',   description: 'Gestão de cohorts de compradores' },
+  { namespace: 'synapse',             label: 'Synapse',        description: 'Motor de contexto — domains, rules e star-commands' },
 ]
 
 // ── AgentMap principal ────────────────────────────────────────────────────────
@@ -227,7 +302,6 @@ export function AgentMap() {
     return map
   }, [agents])
 
-  // Agentes do SDC + suporte (namespace AIOX)
   const sdcAgents = byNamespace['AIOX'] || []
 
   if (loading) {
@@ -240,29 +314,30 @@ export function AgentMap() {
 
   return (
     <div className="relative flex h-full">
-      {/* Canvas */}
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full">
-          <div className="p-6 space-y-4 max-w-4xl">
+          <div className="p-6 space-y-4 max-w-5xl">
 
-            {/* Estatísticas */}
-            <div className="flex items-center gap-4 text-xs text-muted-foreground mb-2">
+            {/* Stats */}
+            <div className="flex items-center gap-4 text-xs text-muted-foreground">
               <span><span className="font-semibold text-foreground">{agents.length}</span> agentes</span>
               <span><span className="font-semibold text-foreground">{Object.keys(byNamespace).length}</span> namespaces</span>
-              <span>Clique em qualquer agente para abrir o perfil completo</span>
+              <span className="hidden sm:block">Clique em qualquer nó para abrir o perfil completo</span>
             </div>
 
-            {/* SDC + suporte AIOX */}
+            {/* SDC */}
             <SdcPipeline agents={sdcAgents} selected={selected} onSelect={setSelected} />
 
-            {/* Divider */}
-            <div className="flex items-center gap-3 py-1">
+            {/* Divisor */}
+            <div className="flex items-center gap-3">
               <div className="flex-1 h-px bg-border" />
-              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Domínios especializados</span>
+              <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold px-1">
+                Domínios especializados
+              </span>
               <div className="flex-1 h-px bg-border" />
             </div>
 
-            {/* Zonas de domínio */}
+            {/* Zonas */}
             {DOMAIN_ZONES.map(zone => (
               <DomainZone
                 key={zone.namespace}
@@ -279,7 +354,7 @@ export function AgentMap() {
         </ScrollArea>
       </div>
 
-      {/* Modal de detalhe */}
+      {/* Modal */}
       {selected && (
         <AgentModal agent={selected} onClose={() => setSelected(null)} />
       )}

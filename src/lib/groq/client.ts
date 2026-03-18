@@ -51,11 +51,12 @@ export interface ChatMessage {
 export async function streamChat(
   messages: ChatMessage[],
   space: Space,
-  frameworkContext?: string
+  frameworkContext?: string,
+  energyContext?: string
 ) {
-  const systemPrompt = frameworkContext
-    ? `${SYSTEM_PROMPTS[space]}\n\n---\n\n${frameworkContext}`
-    : SYSTEM_PROMPTS[space]
+  let systemPrompt = SYSTEM_PROMPTS[space]
+  if (frameworkContext) systemPrompt += `\n\n---\n\n${frameworkContext}`
+  if (energyContext) systemPrompt += `\n\n---\n\nContexto da sessão: ${energyContext}`
 
   const response = await getGroq().chat.completions.create({
     model: GROQ_MODEL,
