@@ -17,6 +17,7 @@ const AGENT_NAMESPACES = [
   { namespace: 'claude-code-mastery', dir: '.claude/commands/claude-code-mastery/agents' },
   { namespace: 'design-system', dir: '.claude/commands/design-system/agents' },
   { namespace: 'cohort-squad', dir: '.claude/commands/cohort-squad/agents' },
+  { namespace: 'synapse', dir: '.claude/commands/synapse' },
 ]
 
 function isLocalEnvironment(): boolean {

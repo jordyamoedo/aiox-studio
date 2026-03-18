@@ -366,6 +366,147 @@ const SECTIONS: WikiSection[] = [
     ],
   },
 
+  // ── CLAUDE CODE MASTERY ─────────────────────────────────────────────────────
+  {
+    id: 'claude-mastery',
+    title: 'Claude Code Mastery',
+    badge: 'Namespace',
+    content: [
+      {
+        type: 'lead',
+        text: 'Especialistas em otimizar e expandir o ambiente Claude Code. Ativados via /claude-code-mastery:agents:{id}.',
+      },
+      { type: 'h3', text: 'Agentes' },
+      {
+        type: 'table',
+        headers: ['Agente', 'Título', 'Escopo'],
+        rows: [
+          ['claude-mastery-chief', 'Mastery Orchestrator', 'Diagnóstico e roteamento para o especialista certo do namespace'],
+          ['config-engineer', 'Config Engineer', 'CLAUDE.md, settings.json, .env, permissões e variáveis'],
+          ['hooks-architect', 'Hooks Architect', 'Hooks do Claude Code — pre/post tool, user_prompt_submit, stop'],
+          ['mcp-integrator', 'MCP Integration Architect', 'MCPs, tools externos, composição de ferramentas'],
+          ['project-integrator', 'Project Integrator', 'Integração de projetos ao ecossistema Claude Code'],
+          ['roadmap-sentinel', 'Roadmap Sentinel', 'Planejamento estratégico do ambiente — o que construir, quando'],
+          ['skill-craftsman', 'Skill Craftsman', 'Criação de skills — workflows reutilizáveis ativados por /slash'],
+          ['swarm-orchestrator', 'Swarm Orchestrator', 'Multi-agente — orquestração de swarms e subagentes paralelos'],
+        ],
+      },
+      {
+        type: 'callout',
+        variant: 'tip',
+        text: 'Para qualquer dúvida sobre otimizar o Claude Code, comece pelo claude-mastery-chief. Ele diagnostica e roteia para o especialista certo.',
+      },
+      { type: 'h3', text: 'Quando usar cada um' },
+      {
+        type: 'cards',
+        items: [
+          { title: 'Criar um novo hook', desc: 'hooks-architect — projeta o hook, define trigger, escreve o script.', tag: 'hooks-architect', color: 'text-indigo-400' },
+          { title: 'Instalar/configurar MCP', desc: 'mcp-integrator — valida o MCP, configura settings, testa integração.', tag: 'mcp-integrator', color: 'text-indigo-400' },
+          { title: 'Criar skill reutilizável', desc: 'skill-craftsman — extrai o workflow, escreve o .md, documenta o uso.', tag: 'skill-craftsman', color: 'text-indigo-400' },
+          { title: 'Rodar agentes em paralelo', desc: 'swarm-orchestrator — divide o trabalho, define contextos, coordena outputs.', tag: 'swarm-orchestrator', color: 'text-indigo-400' },
+        ],
+      },
+    ],
+  },
+
+  // ── DESIGN SYSTEM ───────────────────────────────────────────────────────────
+  {
+    id: 'design-system',
+    title: 'Design System',
+    badge: 'Namespace',
+    content: [
+      {
+        type: 'lead',
+        text: 'Especialistas em sistemas de design atômico, tokens, componentes e visual. Ativados via /design-system:agents:{id}.',
+      },
+      { type: 'h3', text: 'Agentes' },
+      {
+        type: 'table',
+        headers: ['Agente', 'Referência', 'Escopo'],
+        rows: [
+          ['design-chief', 'Orchestrator', 'Diagnóstico e coordenação dos especialistas de design'],
+          ['brad-frost', 'Atomic Design', 'Consolidação de padrões, extração de tokens, componentes atômicos'],
+          ['dan-mall', 'Design Collaboration', 'Venda interna de design system, alinhamento com produto e eng'],
+          ['dave-malouf', 'DesignOps', 'Operações de design em escala — processos, ferramentas, equipe'],
+          ['nano-banana-generator', 'Visual Utility', 'Geração de imagens via Gemini/OpenRouter com prompts estruturados'],
+        ],
+      },
+      {
+        type: 'callout',
+        variant: 'tip',
+        text: 'Para iniciar um design system do zero: design-chief → brad-frost (atomic) → dan-mall (buy-in) → dave-malouf (ops). Para gerar imagens: nano-banana-generator com prompt SCDS.',
+      },
+      { type: 'h3', text: 'nano-banana-generator — Geração de imagens' },
+      {
+        type: 'p',
+        text: 'Usa o modelo Gemini via OpenRouter. O prompt segue o formato SCDS: Subject (o quê), Context (onde), Detail (como), Style (estética). Iteração com PRIO, variações em lote com BATCH.',
+      },
+      {
+        type: 'code',
+        text: `SCDS: {Subject} in {Context}, {Detail}, {Style}
+Exemplo: "Futuristic AI agent hub in dark tech office, neon blue lines, cyberpunk minimalist"`,
+      },
+    ],
+  },
+
+  // ── COHORT SQUAD + SYNAPSE ───────────────────────────────────────────────────
+  {
+    id: 'outros-namespaces',
+    title: 'Cohort Squad & Synapse',
+    badge: 'Namespace',
+    content: [
+      {
+        type: 'lead',
+        text: 'Dois namespaces complementares: Cohort Squad para gestão de grupos de compradores, e Synapse para o motor de contexto inteligente.',
+      },
+      { type: 'h3', text: 'Cohort Squad' },
+      {
+        type: 'table',
+        headers: ['Agente', 'Título', 'Escopo'],
+        rows: [
+          ['cohort-manager', 'Cohort Buyer Manager', 'Gestão de cohorts de compradores — segmentação, análise, estratégia'],
+        ],
+      },
+      {
+        type: 'callout',
+        variant: 'info',
+        text: 'Ativação: /cohort-squad:agents:cohort-manager. Focado em gestão de grupos de clientes, jornada de compra e análise de cohorts.',
+      },
+      { type: 'h3', text: 'Synapse — Motor de Contexto' },
+      {
+        type: 'p',
+        text: 'O Synapse é o sistema que injeta contexto inteligente nas conversas do Claude Code. Funciona com domains (áreas de contexto), rules (regras de injeção) e star-commands (atalhos de contexto).',
+      },
+      {
+        type: 'table',
+        headers: ['Conceito', 'O que é'],
+        rows: [
+          ['Domain', 'Uma área de conhecimento com regras próprias (ex: "supabase", "pagamentos", "design")'],
+          ['Rule', 'Uma instrução que é injetada automaticamente quando o contexto é detectado'],
+          ['Star-command', 'Um atalho (*comando) que carrega contexto específico na conversa'],
+        ],
+      },
+      { type: 'h3', text: 'Comandos do Synapse Manager' },
+      {
+        type: 'table',
+        headers: ['Intenção', 'Sub-comando', 'Resultado'],
+        rows: [
+          ['"criar domain", "novo domain"', 'create', 'Cria novo domain de contexto'],
+          ['"adicionar regra", "nova rule"', 'add', 'Adiciona rule a um domain'],
+          ['"editar regra", "remover rule"', 'edit', 'Modifica rule existente'],
+          ['"ativar/desativar domain"', 'toggle', 'Habilita ou desabilita domain'],
+          ['"criar star-command"', 'add-command', 'Cria novo atalho de contexto'],
+          ['"qual domain usar"', 'suggest', 'Sugere domain ideal para o contexto'],
+        ],
+      },
+      {
+        type: 'callout',
+        variant: 'tip',
+        text: 'Ativação: /synapse:manager. Fale naturalmente o que quer fazer — o manager detecta o sub-comando automaticamente.',
+      },
+    ],
+  },
+
   // ── COMANDOS RÁPIDOS ────────────────────────────────────────────────────────
   {
     id: 'comandos',
@@ -428,8 +569,12 @@ const NAV_GROUPS = [
     items: ['o-que-e', 'camadas'],
   },
   {
-    label: 'Agentes',
+    label: 'Agentes Core',
     items: ['agentes', 'handoff', 'comandos'],
+  },
+  {
+    label: 'Namespaces',
+    items: ['claude-mastery', 'design-system', 'outros-namespaces'],
   },
   {
     label: 'Workflows',

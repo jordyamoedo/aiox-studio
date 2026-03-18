@@ -31,19 +31,25 @@ const NAMESPACE_META: Record<string, {
   'claude-code-mastery': {
     label: 'Claude Mastery',
     description: 'Especialistas em otimizar o ambiente Claude Code',
-    color: 'border-[hsl(234_60%_55%/0.4)] bg-[hsl(234_60%_55%/0.04)]',
+    color: 'border-indigo-500/40 bg-indigo-500/[0.03]',
     defaultOpen: false,
   },
   'design-system': {
     label: 'Design System',
     description: 'Especialistas em sistemas de design atômico e visual',
-    color: 'border-[hsl(330_70%_55%/0.4)] bg-[hsl(330_70%_55%/0.04)]',
+    color: 'border-pink-500/40 bg-pink-500/[0.03]',
     defaultOpen: false,
   },
   'cohort-squad': {
     label: 'Squads',
     description: 'Squads especializados para domínios específicos',
     color: 'border-teal-500/40 bg-teal-500/[0.03]',
+    defaultOpen: false,
+  },
+  synapse: {
+    label: 'Synapse',
+    description: 'Motor de contexto inteligente — domains, rules, star-commands',
+    color: 'border-violet-500/40 bg-violet-500/[0.03]',
     defaultOpen: false,
   },
 }
@@ -72,7 +78,7 @@ const AIOX_SUBGROUPS: Record<string, { ids: string[]; label: string; chipColor: 
   },
 }
 
-const NAMESPACE_ORDER = ['AIOX', 'chiefs', 'claude-code-mastery', 'design-system', 'cohort-squad']
+const NAMESPACE_ORDER = ['AIOX', 'chiefs', 'claude-code-mastery', 'design-system', 'cohort-squad', 'synapse']
 
 // ── Pipeline SDC ─────────────────────────────────────────────────────────────
 
@@ -204,6 +210,8 @@ function NamespaceSection({
     ? 'bg-pink-500/10 border-pink-500/30 text-pink-400'
     : namespace === 'cohort-squad'
     ? 'bg-teal-500/10 border-teal-500/30 text-teal-400'
+    : namespace === 'synapse'
+    ? 'bg-violet-500/10 border-violet-500/30 text-violet-400'
     : 'bg-secondary border-border text-foreground'
 
   return (
