@@ -3,9 +3,10 @@
 import { useEffect, useState, useMemo } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { X, ArrowRight, ChevronDown, ChevronUp } from 'lucide-react'
+import { ArrowRight, ChevronDown, ChevronUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { AIOXAgent } from '@/types'
+import { AgentModal } from './agent-modal'
 
 // ── Cores e metadados por namespace ──────────────────────────────────────────
 
@@ -59,78 +60,6 @@ function AgentChip({
   )
 }
 
-// ── AgentDetail ───────────────────────────────────────────────────────────────
-
-function AgentDetail({ agent, onClose }: { agent: AIOXAgent; onClose: () => void }) {
-  const style = NS_STYLE[agent.namespace] || NS_STYLE['cohort-squad']
-  const support = SDC_SUPPORT[agent.id]
-  const sdcStep = SDC_STEPS.find(s => s.id === agent.id)
-
-  return (
-    <div className="w-72 shrink-0 border-l border-border bg-card flex flex-col">
-      <div className="flex items-start justify-between p-4 border-b border-border">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2 mb-0.5">
-            <span className="font-semibold text-sm font-mono">@{agent.id}</span>
-            <Badge variant="outline" className="text-xs shrink-0">{style.label}</Badge>
-          </div>
-          <p className="text-xs text-muted-foreground">{agent.name}</p>
-        </div>
-        <button onClick={onClose} className="p-1 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors shrink-0">
-          <X className="h-3.5 w-3.5" />
-        </button>
-      </div>
-
-      <ScrollArea className="flex-1 p-4">
-        <div className="space-y-4">
-          {/* Papel no SDC */}
-          {(sdcStep || support) && (
-            <div className="rounded-lg border border-border bg-secondary/40 px-3 py-2.5">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
-                {sdcStep ? 'Fase no SDC' : 'Relação com SDC'}
-              </p>
-              <p className="text-xs text-foreground">
-                {sdcStep ? `Fase ${SDC_STEPS.indexOf(sdcStep) + 1} — ${sdcStep.label}: ${sdcStep.desc}` : support?.label}
-              </p>
-            </div>
-          )}
-
-          {agent.role && (
-            <div>
-              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">Função</p>
-              <p className="text-sm leading-relaxed">{agent.role}</p>
-            </div>
-          )}
-
-          {agent.whenToUse && (
-            <div>
-              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">Quando usar</p>
-              <p className="text-xs text-muted-foreground leading-relaxed">{agent.whenToUse}</p>
-            </div>
-          )}
-
-          {agent.commands.length > 0 && (
-            <div>
-              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                Comandos ({agent.commands.length})
-              </p>
-              <div className="space-y-1">
-                {agent.commands.map(cmd => (
-                  <code key={cmd} className="block text-xs bg-secondary px-2 py-1 rounded font-mono">*{cmd}</code>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div>
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">Ativar com</p>
-            <code className="block text-xs bg-secondary px-2 py-1.5 rounded font-mono break-all">{agent.activationCmd}</code>
-          </div>
-        </div>
-      </ScrollArea>
-    </div>
-  )
-}
 
 // ── SDC Pipeline visual ───────────────────────────────────────────────────────
 
@@ -310,7 +239,7 @@ export function AgentMap() {
   }
 
   return (
-    <div className="flex h-full">
+    <div className="relative flex h-full">
       {/* Canvas */}
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full">
@@ -320,7 +249,7 @@ export function AgentMap() {
             <div className="flex items-center gap-4 text-xs text-muted-foreground mb-2">
               <span><span className="font-semibold text-foreground">{agents.length}</span> agentes</span>
               <span><span className="font-semibold text-foreground">{Object.keys(byNamespace).length}</span> namespaces</span>
-              <span>Clique em qualquer agente para ver detalhes</span>
+              <span>Clique em qualquer agente para abrir o perfil completo</span>
             </div>
 
             {/* SDC + suporte AIOX */}
@@ -350,9 +279,9 @@ export function AgentMap() {
         </ScrollArea>
       </div>
 
-      {/* Painel de detalhe */}
+      {/* Modal de detalhe */}
       {selected && (
-        <AgentDetail agent={selected} onClose={() => setSelected(null)} />
+        <AgentModal agent={selected} onClose={() => setSelected(null)} />
       )}
     </div>
   )

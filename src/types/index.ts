@@ -35,17 +35,47 @@ export interface SessionCheckin {
   created_at: string
 }
 
+export interface AgentCommand {
+  name: string
+  description: string
+  args?: string
+  visibility?: string[]
+}
+
 export interface AIOXAgent {
   id: string
-  name: string
+  name: string          // persona name (e.g. "Dex")
   persona: string
-  role: string
+  role: string          // agent.title
   scope: string
   whenToUse: string
-  commands: string[]
+  commands: string[]    // nomes simples (compatibilidade)
+  commandsFull: AgentCommand[]  // comandos com descrição e args
   filePath: string
-  namespace: string   // 'AIOX' | 'chiefs' | 'claude-code-mastery' | 'design-system' | 'cohort-squad'
-  activationCmd: string // e.g. '/AIOX:agents:dev' or '/chiefs:agents:copy-chief'
+  namespace: string
+  activationCmd: string
+  // Identidade
+  icon?: string
+  archetype?: string
+  zodiac?: string
+  identity?: string
+  style?: string
+  tone?: string
+  vocabulary?: string[]
+  greeting?: string
+  signatureClosing?: string
+  // Diretrizes
+  corePrinciples?: string[]
+  customization?: string
+  // Dependências
+  dependencies?: {
+    tasks?: string[]
+    templates?: string[]
+    checklists?: string[]
+    data?: string[]
+    utils?: string[]
+    workflows?: string[]
+  }
 }
 
 export interface AIOXFrameworkContext {

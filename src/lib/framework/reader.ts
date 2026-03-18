@@ -93,6 +93,79 @@ export async function getFrameworkContext(): Promise<AIOXFrameworkContext> {
   }
 }
 
+function extractYamlBlock(content: string): string {
+  const match = content.match(/```ya?ml\n([\s\S]*?)```/)
+  return match?.[1] || ''
+}
+
+function extractListItems(yaml: string, key: string): string[] {
+  const pattern = new RegExp(`${key}:\\s*\\n((?:\\s+-[^\\n]+\\n?)*)`, 'm')
+  const match = yaml.match(pattern)
+  if (!match) return []
+  return match[1]
+    .split('\n')
+    .map(l => l.replace(/^\s+-\s*/, '').trim())
+    .filter(Boolean)
+}
+
+function extractScalar(yaml: string, key: string): string {
+  const match = yaml.match(new RegExp(`^\\s*${key}:\\s*['\"]?([^'\"\\n]+)['\"]?`, 'm'))
+  return match?.[1]?.trim() || ''
+}
+
+function extractMultilineScalar(yaml: string, key: string): string {
+  const match = yaml.match(new RegExp(`${key}:\\s*[|>]?\\s*'?"?([^'"\\n][\\s\\S]*?)(?=\\n\\s*\\w+:|$)`, 'm'))
+  if (!match) {
+    const simple = yaml.match(new RegExp(`${key}:\\s*'([^']+)'`))
+    if (simple) return simple[1].trim()
+    const dbl = yaml.match(new RegExp(`${key}:\\s*"([^"]+)"`))
+    if (dbl) return dbl[1].trim()
+  }
+  return match?.[1]?.trim() || ''
+}
+
+function parseCommandsFull(yaml: string): import('@/types').AgentCommand[] {
+  const cmds: import('@/types').AgentCommand[] = []
+  // Match each command block: - name: X\n    description: Y\n    (args: Z)?
+  const cmdSection = yaml.match(/^commands:([\s\S]*?)(?=^\w|\Z)/m)?.[1] || yaml
+  const blocks = [...cmdSection.matchAll(/- name:\s*([^\n]+)\n((?:\s+[^\n]+\n?)*)/g)]
+  for (const block of blocks) {
+    const name = block[1].trim()
+    const body = block[2]
+    const descMatch = body.match(/description:\s*['"]?([^'"]+)['"]?/)
+    const argsMatch = body.match(/args:\s*['"]?([^'"]+)['"]?/)
+    const visMatch = body.match(/visibility:\s*\[([^\]]+)\]/)
+    cmds.push({
+      name,
+      description: descMatch?.[1]?.trim() || '',
+      args: argsMatch?.[1]?.trim(),
+      visibility: visMatch ? visMatch[1].split(',').map(v => v.trim().replace(/['"]/g, '')) : undefined,
+    })
+  }
+  return cmds
+}
+
+function parseDependencies(yaml: string): AIOXAgent['dependencies'] {
+  const depsSection = yaml.match(/^dependencies:([\s\S]*?)(?=^autoClaude:|^security:|^ids_hooks:|$)/m)?.[1] || ''
+  if (!depsSection) return {}
+
+  const extract = (key: string) => {
+    const section = depsSection.match(new RegExp(`${key}:\\s*\\n((?:\\s+-[^\\n]+\\n?)*)`, 'm'))
+    if (!section) return undefined
+    const items = section[1].split('\n').map(l => l.replace(/^\s+-\s*/, '').trim()).filter(Boolean)
+    return items.length ? items : undefined
+  }
+
+  return {
+    tasks: extract('tasks'),
+    templates: extract('templates'),
+    checklists: extract('checklists'),
+    data: extract('data'),
+    utils: extract('utils'),
+    workflows: extract('workflows'),
+  }
+}
+
 function parseAgentFile(
   content: string,
   filename: string,
@@ -100,32 +173,77 @@ function parseAgentFile(
   namespace: string
 ): AIOXAgent | null {
   try {
-    const nameMatch = content.match(/^\s*name:\s*([^\n]+)/m)
-    const idMatch = content.match(/^\s*id:\s*([^\n]+)/m)
-    const titleMatch = content.match(/^\s*title:\s*([^\n]+)/m)
-    const roleMatch = content.match(/^\s*role:\s*([^\n]+)/m)
-    const whenToUseMatch = content.match(/whenToUse:\s*\|?\s*\n?([\s\S]*?)(?=\n\S|\ncommands:|$)/)
+    const yaml = extractYamlBlock(content)
+    const src = yaml || content
 
-    const name = nameMatch?.[1]?.trim() || filename.replace('.md', '')
-    const id = idMatch?.[1]?.trim() || filename.replace('.md', '')
+    // Identidade básica
+    const name = extractScalar(src, 'name') || filename.replace('.md', '')
+    const id = extractScalar(src, 'id') || filename.replace('.md', '')
+    const title = extractScalar(src, 'title').replace(/^["']|["']$/g, '')
+    const icon = extractScalar(src, 'icon').replace(/^["']|["']$/g, '')
 
-    const commandMatches = [...content.matchAll(/- name:\s*([^\n]+)/g)]
-    const commands = commandMatches.map(m => m[1].trim()).slice(0, 10)
+    // whenToUse — pode ser inline ou multiline
+    const whenToUseInline = src.match(/whenToUse:\s*['"]([^'"]+)['"]/)?.[1]
+    const whenToUseBlock = src.match(/whenToUse:\s*\|?\s*\n([\s\S]*?)(?=\n\s*\w+:|$)/)?.[1]
+      ?.split('\n').map(l => l.trim()).filter(Boolean).join(' ')
+    const whenToUse = (whenToUseInline || whenToUseBlock || '').trim()
 
-    // Activation command: /{namespace}:agents:{id}
+    // Persona profile
+    const archetype = extractScalar(src, 'archetype')
+    const zodiac = extractScalar(src, 'zodiac').replace(/^['"]|['"]$/g, '')
+    const tone = extractScalar(src, 'tone')
+    const vocabulary = extractListItems(src, 'vocabulary')
+
+    // Greeting / closing
+    const archetypalGreeting = src.match(/archetypal:\s*['"]([^'"]+)['"]/)?.[1] || ''
+    const signatureClosing = src.match(/signature_closing:\s*['"]([^'"]+)['"]/)?.[1] || ''
+
+    // Persona
+    const roleMatch = src.match(/^persona:\s*\n[\s\S]*?role:\s*(.+)/m)
+    const role = title || roleMatch?.[1]?.trim().replace(/^['"]|['"]$/g, '') || ''
+    const style = extractScalar(src, 'style')
+    const identity = extractScalar(src, 'identity')
+
+    // Core principles
+    const corePrinciples = extractListItems(src, 'core_principles')
+
+    // Customization
+    const customizationMatch = src.match(/customization:\s*\|\s*\n([\s\S]*?)(?=\n\w|\ncommands:|$)/)
+    const customization = customizationMatch?.[1]?.split('\n').map(l => l.replace(/^\s+/, '')).filter(Boolean).join('\n').trim()
+
+    // Comandos
+    const commandsFull = parseCommandsFull(src)
+    const commands = commandsFull.map(c => c.name).slice(0, 20)
+
+    // Dependências
+    const dependencies = parseDependencies(src)
+
     const activationCmd = `/${namespace}:agents:${id}`
 
     return {
       id,
       name,
       persona: name,
-      role: titleMatch?.[1]?.trim() || roleMatch?.[1]?.trim() || '',
+      role,
       scope: '',
-      whenToUse: whenToUseMatch?.[1]?.trim().slice(0, 200) || '',
+      whenToUse,
       commands,
+      commandsFull,
       filePath: path.join(agentsPath, filename),
       namespace,
       activationCmd,
+      icon,
+      archetype,
+      zodiac,
+      identity,
+      style,
+      tone,
+      vocabulary: vocabulary.length ? vocabulary : undefined,
+      greeting: archetypalGreeting,
+      signatureClosing,
+      corePrinciples: corePrinciples.length ? corePrinciples : undefined,
+      customization: customization || undefined,
+      dependencies: Object.keys(dependencies as object).length ? dependencies : undefined,
     }
   } catch {
     return null
