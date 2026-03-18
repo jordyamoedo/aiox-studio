@@ -1,10 +1,10 @@
 import { PageLayout } from '@/components/shared/page-layout'
-import { WikiSearch } from '@/components/framework/wiki-search'
+import { Wiki } from '@/components/framework/wiki'
 
 export default function WikiPage() {
   return (
-    <PageLayout title="Wiki" subtitle="Busca no framework local" space="framework">
-      <WikiSearch />
+    <PageLayout title="Wiki" subtitle="Referência completa do framework" space="framework">
+      <Wiki />
     </PageLayout>
   )
 }
