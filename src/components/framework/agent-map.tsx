@@ -306,14 +306,14 @@ export function AgentMap() {
 
   if (loading) {
     return (
-      <div className="flex h-full items-center justify-center">
+      <div className="flex flex-1 items-center justify-center">
         <p className="text-sm text-muted-foreground">Carregando agentes...</p>
       </div>
     )
   }
 
   return (
-    <div className="relative flex h-full">
+    <div className="relative flex flex-1 min-h-0">
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full">
           <div className="p-6 space-y-4 max-w-5xl">

@@ -23,7 +23,7 @@ export function CheckinFlow({ onComplete }: CheckinFlowProps) {
   }
 
   return (
-    <div className="flex h-full flex-col items-center justify-center p-8">
+    <div className="flex flex-1 flex-col items-center justify-center p-8">
       <div className="w-full max-w-sm space-y-6">
 
         {/* Progress bar */}

@@ -106,7 +106,7 @@ export function LayersView() {
   const [expanded, setExpanded] = useState<string | null>('L3')
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex flex-1 flex-col min-h-0">
       <div className="border-b border-border px-6 py-4">
         <p className="text-sm text-muted-foreground max-w-2xl">
           O AIOX é organizado em 4 camadas de mutabilidade. Entender onde cada coisa vive é a chave

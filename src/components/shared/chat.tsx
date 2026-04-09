@@ -98,7 +98,7 @@ export function Chat({ space, placeholder, emptyStateTitle, emptyStateHint }: Ch
   }
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex flex-1 flex-col min-h-0">
       {/* Messages */}
       <ScrollArea className="flex-1 p-4">
         {messages.length === 0 ? (

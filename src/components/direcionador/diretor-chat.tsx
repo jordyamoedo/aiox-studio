@@ -161,7 +161,7 @@ export function DiretorChat() {
   }
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex flex-1 flex-col min-h-0">
 
       {/* Barra de contexto do check-in */}
       <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-secondary/20 shrink-0">

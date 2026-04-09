@@ -721,7 +721,7 @@ export function Wiki() {
   const activeSection = SECTIONS.find(s => s.id === activeId) || SECTIONS[0]
 
   return (
-    <div className="flex h-full">
+    <div className="flex flex-1 min-h-0">
       {/* Sidebar de navegação */}
       <div className="w-52 shrink-0 border-r border-border flex flex-col">
         {/* Search */}

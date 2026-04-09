@@ -33,7 +33,7 @@ export function PageLayout({
             )}
           </div>
         </header>
-        <div className={cn('flex-1 overflow-hidden', contentClassName)}>
+        <div className={cn('flex flex-col flex-1 min-h-0 overflow-hidden', contentClassName)}>
           {children}
         </div>
       </div>
